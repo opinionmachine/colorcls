@@ -1,0 +1,14 @@
+{
+  "name": "colorcls (.NET 11)",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:11.0",
+  // clang + zlib are only needed for `dotnet publish colorcls.cs` (native AOT)
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev",
+  "containerEnv": {
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+    "DOTNET_NOLOGO": "1",
+    "COLORTERM": "truecolor"
+  },
+  "customizations": {
+    "vscode": { "extensions": ["ms-dotnettools.csdevkit"] }
+  }
+}

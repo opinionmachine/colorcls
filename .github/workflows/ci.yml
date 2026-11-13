@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Unit tests
+        run: dotnet tests/tests.cs
+
+      # Native AOT needs clang and zlib headers on Linux; the macOS and Windows images ship their toolchains.
+      - name: Native build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
+
+      - name: Publish native binary
+        run: dotnet publish colorcls.cs
+
+      - name: Smoke test the binary
+        run: |
+          ./artifacts/colorcls/colorcls --version
+          ./artifacts/colorcls/colorcls -la --color=always
+          ./artifacts/colorcls/colorcls --tree=2 --no-icons src tests
