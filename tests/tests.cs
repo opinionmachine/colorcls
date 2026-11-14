@@ -52,6 +52,13 @@ static class Make
     {
         public string Path { get; } = Directory.CreateTempSubdirectory("colorcls-test-").FullName;
         public string At(string relative) => System.IO.Path.Combine(Path, relative);
-        public void Dispose() => Directory.Delete(Path, recursive: true);
+
+        public void Dispose()
+        {
+            // git marks its object files read-only, which stops Windows from deleting them
+            foreach (var file in Directory.EnumerateFiles(Path, "*", SearchOption.AllDirectories))
+                System.IO.File.SetAttributes(file, FileAttributes.Normal);
+            Directory.Delete(Path, recursive: true);
+        }
     }
 }

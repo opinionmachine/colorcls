@@ -1,0 +1,3 @@
+# LF everywhere: the .cs entry points have shebangs, and the tests compare exact output
+# against multi-line string literals, which take their line endings from the source file.
+* text=auto eol=lf
