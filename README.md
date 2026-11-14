@@ -73,7 +73,7 @@ alias ls=colorcls
 
 ### Homebrew .NET on macOS
 
-Homebrew's .NET links native binaries against Homebrew's OpenSSL, brotli and zstd. `cake.cs` adds Homebrew's `lib` folder to the linker path for you. The binary loads those libraries at startup, so if a `brew upgrade` replaces OpenSSL with a new major version and `colorcls` stops starting, run `Install` again.
+Homebrew's .NET links native binaries against Homebrew's OpenSSL, brotli and zstd. `cake.cs` adds Homebrew's `lib` folder to the linker path so the build succeeds, and `Directory.Build.targets` tells the linker to drop the libraries again because colorcls never calls them. The installed binary depends on system libraries only.
 
 ## Usage
 
@@ -146,6 +146,7 @@ The app is a file-based program: there is no `.csproj`. `colorcls.cs` is the ent
 | `src/Renderer.cs` | The grid, long, one-per-line and tree layouts |
 | `tests/` | Unit tests, one file per source file under test |
 | `cake.cs` | Build script ([Cake](https://cakebuild.net/) as a file-based app) |
+| `Directory.Build.targets` | Linker setting for macOS: leave out libraries the binary never calls |
 
 Build targets:
 

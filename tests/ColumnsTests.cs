@@ -2,8 +2,8 @@ using Xunit;
 
 public class ColumnsTests
 {
-    static readonly Columns columns = new(Make.Plain(), Make.Options(), Make.Now);
-    static readonly Columns bare = new(Make.Plain(), Make.Options("--no-icons"), Make.Now);
+    static readonly Columns columns = new(Make.Plain(), Make.Options(), Make.Now, t => t);
+    static readonly Columns bare = new(Make.Plain(), Make.Options("--no-icons"), Make.Now, t => t);
 
     [Theory]
     [InlineData(EntryKind.File, 0b110_100_100, "-rw-r--r--")]
@@ -42,9 +42,16 @@ public class ColumnsTests
         Assert.Equal("05 Mar 2024 09:07", columns.Time(Make.File("f", mtime: new DateTime(2024, 3, 5, 9, 7, 0))).Text);
 
     [Fact]
+    public void TimeIsShownInLocalTime()
+    {
+        var twoHoursAhead = new Columns(Make.Plain(), Make.Options(), Make.Now, utc => utc.AddHours(2));
+        Assert.Equal("05 Mar 2024 11:07", twoHoursAhead.Time(Make.File("f", mtime: new DateTime(2024, 3, 5, 9, 7, 0))).Text);
+    }
+
+    [Fact]
     public void TimeColourFollowsAge()
     {
-        var colour = new Columns(new Terminal(false, Color: true, TrueColor: true, 80), Make.Options(), Make.Now);
+        var colour = new Columns(new Terminal(false, Color: true, TrueColor: true, 80), Make.Options(), Make.Now, t => t);
         string Code(TimeSpan age) => colour.Time(Make.File("f", mtime: Make.Now - age)).Text.Split('m')[0];
         Assert.Equal(Code(TimeSpan.FromMinutes(5)), Code(TimeSpan.FromMinutes(59)));
         Assert.NotEqual(Code(TimeSpan.FromMinutes(59)), Code(TimeSpan.FromHours(2)));
@@ -83,7 +90,7 @@ public class ColumnsTests
     public void LabelCanBeAHyperlink()
     {
         Assert.SkipWhen(OperatingSystem.IsWindows(), "POSIX path");
-        var linked = new Columns(Make.Plain(), Make.Options("--no-icons", "--hyperlink"), Make.Now).Label(Make.File("a.txt"));
+        var linked = new Columns(Make.Plain(), Make.Options("--no-icons", "--hyperlink"), Make.Now, t => t).Label(Make.File("a.txt"));
         Assert.Equal("\e]8;;file:///x/a.txt\e\\a.txt\e]8;;\e\\", linked.Text);
         Assert.Equal(5, linked.Width);
     }

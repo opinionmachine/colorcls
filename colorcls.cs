@@ -11,6 +11,8 @@
 #:property TargetFramework=net11.0
 #:property LangVersion=15
 #:property PackAsTool=false
+// Every string the app formats is culture-invariant already; this skips loading ICU at startup (~2 ms).
+#:property InvariantGlobalization=true
 #:include src/App.cs
 #:include src/Options.cs
 #:include src/Terminal.cs

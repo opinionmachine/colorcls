@@ -14,6 +14,7 @@ sealed class Entry
     public uint? Uid { get; init; }
     public uint? Gid { get; init; }
     public long Size { get; init; }
+    /// <summary>Modification time in UTC: converting to local time is left to the one column that prints it.</summary>
     public DateTime MTime { get; init; }
     public string? LinkTarget { get; init; }
     public bool IsDead { get; init; }
@@ -49,7 +50,7 @@ sealed class Entry
                 Uid = stat?.Uid,
                 Gid = stat?.Gid,
                 Size = fi is FileInfo f ? f.Length : 0,
-                MTime = fi.LastWriteTime,
+                MTime = fi.LastWriteTimeUtc,
                 LinkTarget = target,
                 IsDead = kind == EntryKind.Symlink && !TargetExists(fi),
             };

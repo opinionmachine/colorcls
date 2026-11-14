@@ -7,7 +7,7 @@ public class RendererTests
     {
         var output = new StringWriter { NewLine = "\n" };
         var term = Make.Plain(width);
-        new Renderer(output, new Columns(term, Make.Options("--no-icons"), Make.Now), term)
+        new Renderer(output, new Columns(term, Make.Options("--no-icons"), Make.Now, t => t), term)
             .Render(layout, entries, depth, children ?? (_ => null));
         return output.ToString();
     }

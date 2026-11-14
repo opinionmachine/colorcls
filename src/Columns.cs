@@ -1,7 +1,9 @@
 using System.Globalization;
 
 /// <summary>Turns the fields of an entry into painted cells. No layout decisions live here.</summary>
-sealed class Columns(Terminal term, Options options, DateTime now)
+/// <param name="now">The current time in UTC.</param>
+/// <param name="toLocal">Converts a UTC time to local wall-clock time for display.</param>
+sealed class Columns(Terminal term, Options options, DateTime now, Func<DateTime, DateTime> toLocal)
 {
     public const int MinGitWidth = 3;
 
@@ -93,6 +95,6 @@ sealed class Columns(Terminal term, Options options, DateTime now)
     {
         var age = now - e.MTime;
         var color = age < TimeSpan.FromHours(1) ? Theme.HourOld : age < TimeSpan.FromDays(1) ? Theme.DayOld : Theme.Older;
-        return term.Paint(color, e.MTime.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture));
+        return term.Paint(color, toLocal(e.MTime).ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture));
     }
 }

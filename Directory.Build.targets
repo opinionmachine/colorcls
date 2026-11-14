@@ -1,0 +1,10 @@
+<Project>
+  <!--
+    Picked up by the file-based apps in this folder. Homebrew's .NET links every native binary
+    against OpenSSL, brotli and zstd, which colorcls never calls. Dropping the unused libraries
+    saves about 2 ms per run and means a `brew upgrade` can no longer break the installed binary.
+  -->
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <LinkerArg Include="-Wl,-dead_strip_dylibs" />
+  </ItemGroup>
+</Project>

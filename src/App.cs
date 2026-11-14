@@ -3,7 +3,7 @@ using System.Text;
 /// <summary>One invocation: resolves the paths, feeds listings to the renderer, tracks errors and the report.</summary>
 sealed class App(Options options, Terminal term, TextWriter output)
 {
-    readonly Renderer renderer = new(output, new Columns(term, options, DateTime.Now), term);
+    readonly Renderer renderer = new(output, new Columns(term, options, DateTime.UtcNow, Posix.LocalTime), term);
     // Piped output is one name per line, as with ls, unless colour was forced for a pager.
     readonly Layout layout =
         options.Layout == Layout.Grid && term.Piped && options.Color != ColorWhen.Always ? Layout.OnePerLine : options.Layout;

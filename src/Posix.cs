@@ -31,6 +31,30 @@ static class Posix
     [DllImport("libc")] static extern IntPtr getpwuid(uint uid);
     [DllImport("libc")] static extern IntPtr getgrgid(uint gid);
 
+    // struct tm on 64-bit macOS and Linux: nine ints, then the offset from UTC in seconds.
+    [StructLayout(LayoutKind.Explicit, Size = 56)]
+    struct Tm { [FieldOffset(40)] public long UtcOffset; }
+
+    [DllImport("libc")] static extern IntPtr localtime_r(in long time, out Tm result);
+
+    static bool libcTime = !OperatingSystem.IsWindows() && Environment.Is64BitProcess;
+
+    /// <summary>
+    /// UTC to local wall-clock time. libc answers in microseconds, where TimeZoneInfo.Local costs
+    /// every run about 10 ms to load; the BCL is the fallback where there is no libc.
+    /// </summary>
+    public static DateTime LocalTime(DateTime utc)
+    {
+        if (libcTime)
+            try
+            {
+                var seconds = (long)Math.Floor((utc - DateTime.UnixEpoch).TotalSeconds);
+                if (localtime_r(seconds, out var tm) != IntPtr.Zero) return utc.AddSeconds(tm.UtcOffset);
+            }
+            catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException) { libcTime = false; }
+        return DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToLocalTime();
+    }
+
     static Func<string, Stat?>? platformLstat = (OperatingSystem.IsMacOS(), OperatingSystem.IsLinux(), RuntimeInformation.ProcessArchitecture) switch
     {
         (true, _, Architecture.Arm64) => p => lstat(p, out Darwin s) == 0 ? new Stat(s.Mode, s.Uid, s.Gid) : null,

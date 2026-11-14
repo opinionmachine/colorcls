@@ -25,6 +25,7 @@
 #:include ListingTests.cs
 #:include ColumnsTests.cs
 #:include RendererTests.cs
+#:include PosixTests.cs
 
 /// <summary>Builders shared by the test classes.</summary>
 static class Make
